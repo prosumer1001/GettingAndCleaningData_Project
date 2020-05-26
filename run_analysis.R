@@ -23,25 +23,25 @@ head(x_test)
 tail(x_test)
 View(x_test)
 ## TODO:  Below to the cutline is the code that makes the partialDF.  The next thing to do is combine the partialDF and the completeDF.  Then all of the steps need to be outlined in the CODEBOOK.Rmd
-subject_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/subject_test.txt")
-y_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/y_test.txt")
-activity_labels <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/activity_labels.txt")
-unique(activity_labels)
-y_test <- tibble::rowid_to_column(y_test, "ID")
-subject_test <- tibble::rowid_to_column(subject_test, "ID")
-partialDF <- left_join(y_test, subject_test, by = "ID")
-partialDF <- partialDF %>% rename(factor = V1.x)
-partialDF <- partialDF %>% rename(subject = V1.y)
-activity_labels <- activity_labels %>% rename(factor = V1)
-activity_labels <- activity_labels %>% rename(activity_category = V2)
-str(list(partialDF, activity_labels))
-example <- sample_n(partialDF, 6)
-partialDF <- left_join(partialDF, activity_labels, by = "factor"); str(partialDF)
-sample_n(partialDF, 25)
+subject_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/subject_test.txt") ## load the subject_text.txt data file
+y_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/y_test.txt") ## load the y_test.txt data file
+activity_labels <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/activity_labels.txt") ## load the activity_labels.txt data file
+# unique(activity_labels)
+y_test <- tibble::rowid_to_column(y_test, "ID") ## create a unique variable named `ID` in the y_test for left_join(by = "ID")
+subject_test <- tibble::rowid_to_column(subject_test, "ID") ## create a unique variable named `ID` in the subject_test for left_join(by = "ID")
+partialDF <- left_join(y_test, subject_test, by = "ID") ## left_join y_test and subject_test by = "ID" to make the partialDF dataframe
+partialDF <- partialDF %>% rename(factor = V1.x) ## rename the V1.x vairable to `factor` for left_join with activity_labels later
+partialDF <- partialDF %>% rename(subject = V1.y)  ## rename V1.y as the subject number for clarity
+activity_labels <- activity_labels %>% rename(factor = V1) ## rename the V1 variable from activity_lables to factor for left_join with partialDF
+activity_labels <- activity_labels %>% rename(activitycategory = V2) ## rename V2 from activity_labels to acticity_category for clear variable description
+# str(list(partialDF, activity_labels)) 
+partialDF <- left_join(partialDF, activity_labels, by = "factor"); str(partialDF)  ## conduct left_join(by = "factor") for the partialDF and activity_lables described above; use str() to review the outcome of the join
+sample_n(partialDF, 25) ## take a sample of the partialDF to make sure that the DF is complete and accurate
+## CUT LINE ##
 y_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/y_test.txt")
 str(y_test); View(y_test); head(y_test)
 unique(y_test)
-## CUT LINE ##
+
 
 
 

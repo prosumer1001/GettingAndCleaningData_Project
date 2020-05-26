@@ -4,6 +4,27 @@ author:  Nick T.
 output: html_notebook
 ---
 
+```{r, load_libraries, echo = FALSE, warning = FALSE, message = FALSE}
+  ipak <- function(pkg){
+    new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+    if (length(new.pkg)) 
+      install.packages(new.pkg, dependencies = TRUE)
+    sapply(pkg, require, character.only = TRUE)
+  }
+  # Install and Load Packages
+  packages <- c("purrr",
+                "rio", 
+                "tidyverse",
+                "stringr")
+  ipak(packages)
+```
+
+```{r, load_data, echo = FALSE, warning = FALSE, message = FALSE}
+features <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/features.txt") # import features.txt data into working environment
+x_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/x_test.txt") # import features.txt data into working environment
+
+```
+
 # Preface 
 
 The Coursera course *Getting and Cleaning Data* CODEBOOK is intended to provide the user with enough information to replicate the data analysis in the project.  Users of the CODEBOOK should be able to understand how the data was tidyed to its current state.  
@@ -48,7 +69,28 @@ The data codebook can be obtained from the author's .git repository, `GettingAnd
 
 # Step 1. Process different datasets.  
 
-First, I take the `raw` datasets and transofrm them into individual `processed` datasets.  The first is the `features.txt` data.  The comments in the code follow the process for creating the first dataframe named `complete.RData`, which is saved in the `./Project/Data/Processed` directory.  The steps follow:
+First, I take the `raw` datasets and transofrm them into individual `processed` datasets.  The first is the `features.txt` data.  The comments in the code follow the process for creating the first dataframe named `complete.RData`, which is saved in the `./Project/Data/Processed` directory.  this step creates the naming convention for the features included in the completed dataframe.  The naming conventions form the original features_info.txt file provies the most succinct and descriptive naming.  Quoting from the features_info.txt file:
+
+> The features selected for this database come from the accelerometer and gyroscope 3-axial raw signals tAcc-XYZ and tGyro-XYZ. These time domain signals (prefix 't' to denote time) were captured at a constant rate of 50 Hz. Then they were filtered using a median filter and a 3rd order low pass Butterworth filter with a corner frequency of 20 Hz to remove noise. Similarly, the acceleration signal was then separated into body and gravity acceleration signals (tBodyAcc-XYZ and tGravityAcc-XYZ) using another low pass Butterworth filter with a corner frequency of 0.3 Hz. 
+
+> Subsequently, the body linear acceleration and angular velocity were derived in time to obtain Jerk signals (tBodyAccJerk-XYZ and tBodyGyroJerk-XYZ). Also the magnitude of these three-dimensional signals were calculated using the Euclidean norm (tBodyAccMag, tGravityAccMag, tBodyAccJerkMag, tBodyGyroMag, tBodyGyroJerkMag). 
+
+> Finally a Fast Fourier Transform (FFT) was applied to some of these signals producing fBodyAcc-XYZ, fBodyAccJerk-XYZ, fBodyGyro-XYZ, fBodyAccJerkMag, fBodyGyroMag, fBodyGyroJerkMag. (Note the 'f' to indicate frequency domain signals). 
+
+> These signals were used to estimate variables of the feature vector for each pattern:  
+'-XYZ' is used to denote 3-axial signals in the X, Y and Z directions.
+
+The difference between the original file and the naming conventions used in this dataframe include the removal of all special characters (i.e. **-** and **()**).  Additionally, all characters were changed to lower case.  Thus, a prior exmaple might be:  `fBodyAccJerkMag` and the new variable name is `fbodyaccjerkmag`.  While the lack of upper case letters may make deciphering the variable more difficult at first, it will make errors in the code of future uesers less likely to occur.  The practical benefits is that a major transformation has not taken place, so using the original code-book ensures replicability with less errors, which should increase the likelyhood of replication, all else equal.
+
+The steps used to transform this data are as follows:
+
+1. Load the features and x-test data into the local environment.
+2. Remove all punctuation and change characters to lower case.
+3. Rename vairalbes and use `select()` to choose only the `featureNames` variable for later use.
+4. Make the vector `featureNames` from the prior step into the column names for the `x_test` dataframe.
+5. Create a new processed dataframe called `completeDF` that will be joined later by the `partialDF` dataframe.
+6. Add an ID row to the dataframe for later join with `partialDF`.
+7. Save the `comleteDF` as an RDataframe for ease of use.
 
 
 
@@ -69,8 +111,35 @@ export(completeDF, file = "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningD
 
 # Step 2. Process the y_test.txt dataset, the activity_labels.txt dataset, and the subject_test.txt data sets.  
 
-These provide a different challenge than the x_test data wrangling in Step 1, which requried transposing a vector and turning it into column names.  Then attributing the column names to the x_test.txt dataframe.  
+These provide a different challenge than the x_test data wrangling in Step 1, which requried transposing a vector and turning it into column names.  In this sequence of data wrangling the subjects, identified by an integer (1-30), needed to be married to the different factor values for walking, walking upstairs, walking downstairs, sitting, standing, and laying down.  The six categories are factors, since one can realistically understanding that lying down is less arduous than ascending stairs.  
 
+The steps needed to complete Step 2 are as follows:
+
+1. Load the subject, y-test data, and activity labels data in the local environment.
+2. Create `ID` variables in the y-test and subject dataframes so they can be joined by the same.
+3. Conduct a `dplyr` `left_join()` by the `ID` variables created in the prior step; for the case of this dataframe I decided to call the dataframe `partialDF`, which will ultimately join with the `completeDF` from Step 1 above.
+4. Rename the variables created by the data import and left join.  The new variable names are `factor` and `subject` in the partialDF dataframe.  The activity lables dataframe will also receive a variable named `factor` that is synonomous with the `partialDF` factor variable.  The two dataframes will be left joined in the next step by the `factor` variable.  Finally, the activity label's second variable is renamed to `activitycategory`.  The names were chosen to be as simple as possible and follow the naming convention for the x-test variable from Step 1.
+5. Conduct a `left_join()` between `activity_labels` dataframe and the `partialDF` dataframe by the `factor` variable.  A check of the dataframe with `sample_n()` form `dplyr` verifies the appropriate factors are matched with the activity categories.
+6. Finally, exporting the `partialDF` to the `./Project/Data/Processed` directory ensures data replication and makes future joins easier to work with.
+
+```{r, factor_observations, message = FALSE, warning=FALSE}
+subject_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/subject_test.txt") ## load the subject_text.txt data file
+y_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/y_test.txt") ## load the y_test.txt data file
+activity_labels <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/activity_labels.txt") ## load the activity_labels.txt data file
+# unique(activity_labels)
+y_test <- tibble::rowid_to_column(y_test, "ID") ## create a unique variable named `ID` in the y_test for left_join(by = "ID")
+subject_test <- tibble::rowid_to_column(subject_test, "ID") ## create a unique variable named `ID` in the subject_test for left_join(by = "ID")
+partialDF <- left_join(y_test, subject_test, by = "ID") ## left_join y_test and subject_test by = "ID" to make the partialDF dataframe
+partialDF <- partialDF %>% rename(factor = V1.x) ## rename the V1.x vairable to `factor` for left_join with activity_labels later
+partialDF <- partialDF %>% rename(subject = V1.y)  ## rename V1.y as the subject number for clarity
+activity_labels <- activity_labels %>% rename(factor = V1) ## rename the V1 variable from activity_lables to factor for left_join with partialDF
+activity_labels <- activity_labels %>% rename(activitycategory = V2) ## rename V2 from activity_labels to acticity_category for clear variable description
+# str(list(partialDF, activity_labels)) 
+partialDF <- left_join(partialDF, activity_labels, by = "factor"); str(partialDF)  ## conduct left_join(by = "factor") for the partialDF and activity_lables described above; use str() to review the outcome of the join
+sample_n(partialDF, 25) ## take a sample of the partialDF to make sure that the DF is complete and accurate
+export(partialDF, file = "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Processed/partialDF.RData") # save processed data to appropriate directory
+
+```
 
 
 
