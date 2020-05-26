@@ -46,21 +46,30 @@ From the data set in step 4, creates a second, independent tidy data set with th
 
 The data codebook can be obtained from the author's .git repository, `GettingAndCleaningData_Project` titled `HARreadme.txt`.
 
-# Step 1. Process different datasets.  First, I take the `raw` datasets and transofrm them into individual `processed` datasets.  The first is the `features.txt` data.
+# Step 1. Process different datasets.  
+
+First, I take the `raw` datasets and transofrm them into individual `processed` datasets.  The first is the `features.txt` data.  The comments in the code follow the process for creating the first dataframe named `complete.RData`, which is saved in the `./Project/Data/Processed` directory.  The steps follow:
+
+
 
 ```{r, features, message = FALSE, warning=FALSE}
-features <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/UCIHARDataset/features.txt") # import features.txt data into working environment
-x_text <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/UCIHARDataset/test/x_test.txt") # import features.txt data into working environment
+features <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/features.txt") # import features.txt data into working environment
+x_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/x_test.txt") # import features.txt data into working environment
 features$V2 <- str_replace_all(features$V2, "[[:punct:]]", "") # remove all punctuation and ensure there are no spaces
 features$V2 <- tolower(features$V2)  # make all alpha characters lowercase
 features <- features %>%  # change names of variables and select only the strings
         rename(objectid = "V1", featureNames = "V2") %>%
         select(featureNames)
-names(x_text) <- features$featureNames # make the vector featureNames the column names for x_text
-completeDF <- x_text # create new processed dataframe called `completeDF` that will ultimately have all the test data included once processed
+names(x_test) <- features$featureNames # make the vector featureNames the column names for x_test
+completeDF <- x_test # create new processed dataframe called `completeDF` that will ultimately have all the test data included once processed
+completeDF <- tibble::rowid_to_column(completeDF, "ID")
 export(completeDF, file = "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Processed/completeDF.RData") # save processed data to appropriate directory
 ```
 
+
+# Step 2. Process the y_test.txt dataset, the activity_labels.txt dataset, and the subject_test.txt data sets.  
+
+These provide a different challenge than the x_test data wrangling in Step 1, which requried transposing a vector and turning it into column names.  Then attributing the column names to the x_test.txt dataframe.  
 
 
 
