@@ -29,7 +29,9 @@ x_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Proje
 
 The Coursera course *Getting and Cleaning Data* CODEBOOK is intended to provide the user with enough information to replicate the data analysis in the project.  Users of the CODEBOOK should be able to understand how the data was tidyed to its current state.  
 
-The CODEBOOK is a companion to the `run_analysis.R` and `README.md` files.  The github repository is located at https://github.com/prosumer1001/GettingAndCleaningData_Project.  Direct all questions to the author at prosumer1001@gmail.com.
+The `CODEBOOK` is a companion to the `run_analysis.R` and `README.md` files.  The github repository is located at https://github.com/prosumer1001/GettingAndCleaningData_Project.  Direct all questions to the author at prosumer1001@gmail.com.
+
+
 
 # Instructions
 
@@ -63,9 +65,9 @@ Uses descriptive activity names to name the activities in the data set
 Appropriately labels the data set with descriptive variable names.
 From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
 
-# CODEBOOK
+# README
 
-The data codebook can be obtained from the author's .git repository, `GettingAndCleaningData_Project` titled `HARreadme.txt`.
+The data codebook can be obtained from the author's .git repository, `GettingAndCleaningData_Project` titled `HARreadme.txt`.  The final tidy dataframe `CODEBOOK.Rmd` that accompany's this project provides detailes for each variable according to the original coding rubric.
 
 # Step 1. Process different datasets.  
 
@@ -88,8 +90,8 @@ The steps used to transform this data are as follows:
 2. Remove all punctuation and change characters to lower case.
 3. Rename vairalbes and use `select()` to choose only the `featureNames` variable for later use.
 4. Make the vector `featureNames` from the prior step into the column names for the `x_test` data frame.
-5. Create a new processed data frame called `completeDF` that will be joined later by the `partialDF` data frame.
-6. Add an ID row to the data frame for later join with `partialDF`.
+5. Create a new processed data frame called `observationsDF` that will be joined later by the `partialtestDF` data frame.
+6. Add an ID row to the data frame for later join with `partialtestDF`.
 7. Save the `comleteDF` as an RDataframe for ease of use.
 
 
@@ -103,9 +105,9 @@ features <- features %>%  # change names of variables and select only the string
         rename(objectid = "V1", featureNames = "V2") %>%
         select(featureNames)
 names(x_test) <- features$featureNames # make the vector featureNames the column names for x_test
-completeDF <- x_test # create new processed data frame called `completeDF` that will ultimately have all the test data included once processed
-completeDF <- tibble::rowid_to_column(completeDF, "ID")
-export(completeDF, file = "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Processed/completeDF.RData") # save processed data to appropriate directory
+observationsDF <- x_test # create new processed data frame called `observationsDF` that will ultimately have all the test data included once processed
+observationsDF <- tibble::rowid_to_column(observationsDF, "ID")
+export(observationsDF, file = "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Processed/observationsDF.RData") # save processed data to appropriate directory
 ```
 
 
@@ -117,10 +119,10 @@ The steps needed to complete Step 2 are as follows:
 
 1. Load the subject, y-test data, and activity labels data in the local environment.
 2. Create `ID` variables in the y-test and subject data frames so they can be joined by the same.
-3. Conduct a `dplyr` `left_join()` by the `ID` variables created in the prior step; for the case of this data frame I decided to call the data frame `partialDF`, which will ultimately join with the `completeDF` from Step 1 above.
-4. Rename the variables created by the data import and left join.  The new variable names are `factor` and `subject` in the partialDF data frame.  The activity lables data frame will also receive a variable named `factor` that is synonomous with the `partialDF` factor variable.  The two data frames will be left joined in the next step by the `factor` variable.  Finally, the activity label's second variable is renamed to `activitycategory`.  The names were chosen to be as simple as possible and follow the naming convention for the x-test variable from Step 1.
-5. Conduct a `left_join()` between `activity_labels` data frame and the `partialDF` data frame by the `factor` variable.  A check of the data frame with `sample_n()` form `dplyr` verifies the appropriate factors are matched with the activity categories.
-6. Finally, exporting the `partialDF` to the `./Project/Data/Processed` directory ensures data replication and makes future joins easier to work with.
+3. Conduct a `dplyr` `left_join()` by the `ID` variables created in the prior step; for the case of this data frame I decided to call the data frame `partialtestDF`, which will ultimately join with the `observationsDF` from Step 1 above.
+4. Rename the variables created by the data import and left join.  The new variable names are `factor` and `subject` in the partialtestDF data frame.  The activity lables data frame will also receive a variable named `factor` that is synonomous with the `partialtestDF` factor variable.  The two data frames will be left joined in the next step by the `factor` variable.  Finally, the activity label's second variable is renamed to `activitycategory`.  The names were chosen to be as simple as possible and follow the naming convention for the x-test variable from Step 1.
+5. Conduct a `left_join()` between `activity_labels` data frame and the `partialtestDF` data frame by the `factor` variable.  A check of the data frame with `sample_n()` form `dplyr` verifies the appropriate factors are matched with the activity categories.
+6. Finally, exporting the `partialtestDF` to the `./Project/Data/Processed` directory ensures data replication and makes future joins easier to work with.
 
 ```{r, factor_observations, message = FALSE, warning=FALSE}
 subject_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/subject_test.txt") ## load the subject_text.txt data file
@@ -129,21 +131,21 @@ activity_labels <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningD
 # unique(activity_labels)
 y_test <- tibble::rowid_to_column(y_test, "ID") ## create a unique variable named `ID` in the y_test for left_join(by = "ID")
 subject_test <- tibble::rowid_to_column(subject_test, "ID") ## create a unique variable named `ID` in the subject_test for left_join(by = "ID")
-partialDF <- left_join(y_test, subject_test, by = "ID") ## left_join y_test and subject_test by = "ID" to make the partialDF data frame
-partialDF <- partialDF %>% rename(factor = V1.x) ## rename the V1.x vairable to `factor` for left_join with activity_labels later
-partialDF <- partialDF %>% rename(subject = V1.y)  ## rename V1.y as the subject number for clarity
-activity_labels <- activity_labels %>% rename(factor = V1) ## rename the V1 variable from activity_lables to factor for left_join with partialDF
+partialtestDF <- left_join(y_test, subject_test, by = "ID") ## left_join y_test and subject_test by = "ID" to make the partialtestDF data frame
+partialtestDF <- partialtestDF %>% rename(factor = V1.x) ## rename the V1.x vairable to `factor` for left_join with activity_labels later
+partialtestDF <- partialtestDF %>% rename(subject = V1.y)  ## rename V1.y as the subject number for clarity
+activity_labels <- activity_labels %>% rename(factor = V1) ## rename the V1 variable from activity_lables to factor for left_join with partialtestDF
 activity_labels <- activity_labels %>% rename(activitycategory = V2) ## rename V2 from activity_labels to acticity_category for clear variable description
-# str(list(partialDF, activity_labels)) 
-partialDF <- left_join(partialDF, activity_labels, by = "factor"); str(partialDF)  ## conduct left_join(by = "factor") for the partialDF and activity_lables described above; use str() to review the outcome of the join
-sample_n(partialDF, 25) ## take a sample of the partialDF to make sure that the DF is complete and accurate
-export(partialDF, file = "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Processed/partialDF.RData") # save processed data to appropriate directory
+# str(list(partialtestDF, activity_labels)) 
+partialtestDF <- left_join(partialtestDF, activity_labels, by = "factor"); str(partialtestDF)  ## conduct left_join(by = "factor") for the partialtestDF and activity_lables described above; use str() to review the outcome of the join
+sample_n(partialtestDF, 25) ## take a sample of the partialtestDF to make sure that the DF is complete and accurate
+export(partialtestDF, file = "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Processed/partialtestDF.RData") # save processed data to appropriate directory
 
 ```
 
 # Step 3. Put the data frames together.
 
-The partialDF and completeDFs go together easily with matching observation numbers.  Using `left_join()` by the `ID` variable provides the dataframe with the first four variables as highly descriptive being the consecutive `objectid` variable that provides a sequential count of the observations.  It can easily be dropped if not needed, but provides a ready joining variable for future joins.  The `activityfactor` and `activitycategory` variables are matching and become factor variables.  The final descriptive variable that allows data anlysts to tie different factor values of activity and specific subjects is `subjectnumber`.  The `subjectnumber` variable is a numeric code fo the specific test subject.
+The partialtestDF and completeDFs go together easily with matching observation numbers.  Using `left_join()` by the `ID` variable provides the dataframe with the first four variables as highly descriptive being the consecutive `objectid` variable that provides a sequential count of the observations.  It can easily be dropped if not needed, but provides a ready joining variable for future joins.  The `activityfactor` and `activitycategory` variables are matching and become factor variables.  The final descriptive variable that allows data anlysts to tie different factor values of activity and specific subjects is `subjectnumber`.  The `subjectnumber` variable is a numeric code fo the specific test subject.
 
 Variables 5:565 are the collected data.  Analysts can run analysis using the decoding mechanism quoted in Step 1, above.  The steps needed to complete this final step of the data tidying process are outlined following:
 
@@ -151,21 +153,21 @@ Variables 5:565 are the collected data.  Analysts can run analysis using the dec
 2. Conduct a `left_join()` by the `ID` variable.
 3. Rename the variables so they match the naming convention for the remainder of the dataframe (all lower case descriptive words)
 4. Convert appropriate variables to factors instead of characters or numerics.
-5. Export the `finalDF` to the `./Project/Data/Processed` directory ensures data replication.
+5. Export the `finaltestDF` to the `./Project/Data/Processed` directory ensures data replication.
 
 
 ```{r, final_dataFrame, message = FALSE, warning=FALSE}
-partialDF <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Processed/partialDF.RData") # import partialDF.RData
-completeDF <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Processed/completeDF.RData") ## import completeDF.RData
-finalDF <- left_join(partialDF, completeDF, by = "ID") ## left join by the ID variable
-finalDF <- finalDF %>% rename(activityfactor = factor) ## rename the factor variable to be congruent with dataframe naming convention
-finalDF <- finalDF %>% rename(subjectnumber = subject) ## rename the subject variable to be congruent with dataframe naming convention
-finalDF <- finalDF %>% rename(objectid = ID) ## rename the ID variable to be the objectid variable
-str(finalDF)
-finalDF$activityfactor <- as.factor(finalDF$activityfactor) ## convert to a factor variable
-finalDF$activitycategory <- as.factor(finalDF$activitycategory) ## convert to a factor variable
-finalDF <- finalDF %>% select(c(objectid, activityfactor, activitycategory, subjectnumber), everything())
-export(finalDF, file = "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Processed/finalDF.RData") # save processed data to appropriate directory
+partialtestDF <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Processed/partialtestDF.RData") # import partialtestDF.RData
+observationsDF <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Processed/observationsDF.RData") ## import observationsDF.RData
+finaltestDF <- left_join(partialtestDF, observationsDF, by = "ID") ## left join by the ID variable
+finaltestDF <- finaltestDF %>% rename(activityfactor = factor) ## rename the factor variable to be congruent with dataframe naming convention
+finaltestDF <- finaltestDF %>% rename(subjectnumber = subject) ## rename the subject variable to be congruent with dataframe naming convention
+finaltestDF <- finaltestDF %>% rename(objectid = ID) ## rename the ID variable to be the objectid variable
+str(finaltestDF)
+finaltestDF$activityfactor <- as.factor(finaltestDF$activityfactor) ## convert to a factor variable
+finaltestDF$activitycategory <- as.factor(finaltestDF$activitycategory) ## convert to a factor variable
+finaltestDF <- finaltestDF %>% select(c(objectid, activityfactor, activitycategory, subjectnumber), everything())
+export(finaltestDF, file = "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Processed/finaltestDF.RData") # save processed data to appropriate directory
 ```
 
 
