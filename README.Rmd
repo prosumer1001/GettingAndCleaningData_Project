@@ -1,5 +1,5 @@
 ---
-title: "Coursera *Getting and Cleaning Data* Course Project CODEBOOK"
+title: "Coursera: *Getting and Cleaning Data* - README"
 author:  Nick T.
 output: html_notebook
 ---
@@ -21,34 +21,77 @@ output: html_notebook
 
 # Code Table of Contents (TOC)
 
-## 1. SECION 1 - Import Data
-  A. y_test (TEST LABELS)
-  B. y_train (TRAINING LABELS)
-  C. x_test (TEST DATA)
-  D. x_train (TRAINING DATA)
-  E. subject_test (TEST SUBJECTS)
-  F. subject_train (TRAINING SUBJECTS)
-  G. activity_lables (ACTIVITY FACTOR LABELS)
-  H. features (VARIABLE NAMES AS A FEATURES VECTOR)
+### 1. SECION 1 - Import Data
+|      A. y_test (TEST LABELS)
+|      B. y_train (TRAINING LABELS)
+|      C. x_test (TEST DATA)
+|      D. x_train (TRAINING DATA)
+|      E. subject_test (TEST SUBJECTS)
+|      F. subject_train (TRAINING SUBJECTS)
+|      G. activity_lables (ACTIVITY FACTOR LABELS)
+|      H. features (VARIABLE NAMES AS A FEATURES VECTOR)
 
-## 2. SECTION 2 - Create the datasets data frames
-  A. Create the rows data frame
-  B. Create the xtestResults and xtrainResults data frames. 
+### 2. SECTION 2 - Create the datasets data frames
+|      A. Create the rows data frame
+|      B. Create the xtestResults and xtrainResults data frames. 
 
-## 3. SECTION 3 - Add front matter to xtrainResults and xtestResults DFs.
-  A. Build the xtest results DF with front matter
-  B. Build the xtrain results DF with front matter
+### 3. SECTION 3 - Add front matter to xtrainResults and xtestResults DFs.
+|      A. Build the xtest results DF with front matter
+|      B. Build the xtrain results DF with front matter
 
-## 4. SECTION 4 - Add experimentType column to each DF, "train" for training and
-  A. Add column for experimentType for testing.
-  B. Add column for experimentType for training
+### 4. SECTION 4 - Add experimentType column to each DF, "train" for training and
+|      A. Add column for experimentType for testing.
+|      B. Add column for experimentType for training
 
-## 5. SECTION 5 - Merge xtrainResults and xtestResults into `completeDF`, a single 
-  A. Rename subjectID variables to be identical for both data frames
-  B. dplyr bind_rows()
+### 5. SECTION 5 - Merge xtrainResults and xtestResults into `completeDF`, a single tidy data frame.
+|      A. Rename subjectID variables to be identical for both data frames
+|      B. dplyr bind_rows()
 
+# Preface 
 
-```{r, SECTION01, echo = TRUE, warning = FALSE, message = FALSE}
+The Coursera course *Getting and Cleaning Data* CODEBOOK is intended to provide the user with enough information to replicate the data analysis in the project.  Users of the CODEBOOK should be able to understand how the data was tidyed to its current state.  
+
+The `CODEBOOK` is a companion to the `run_analysis.R` and `README.md` files.  The github repository is located at https://github.com/prosumer1001/GettingAndCleaningData_Project.  Direct all questions to the author at prosumer1001@gmail.com.
+
+# Instructions
+
+### Review Criteria
+
+1. The submitted data set is tidy.
+2. The Github repo contains the required scripts.
+3. GitHub contains a code book that modifies and updates the available codebooks with the data to indicate all the variables and summaries calculated, along with units, and any other relevant information.
+4. The README that explains the analysis files is clear and understandable.
+5. The work submitted for this project is the work of the student who submitted it.
+
+### Course Project Description 
+
+The course project description is copied verbatim from the site.[^1]
+
+The purpose of this project is to demonstrate your ability to collect, work with, and clean a data set. The goal is to prepare tidy data that can be used for later analysis. You will be graded by your peers on a series of yes/no questions related to the project. You will be required to submit: 1) a tidy data set as described below, 2) a link to a Github repository with your script for performing the analysis, and 3) a code book that describes the variables, the data, and any transformations or work that you performed to clean up the data called `CodeBook.md`. You should also include a `README.md` in the repo with your scripts. This `README.md` explains how all of the scripts work and how they are connected.
+
+One of the most exciting areas in all of data science right now is wearable computing - see for example <a href="http://www.insideactivitytracking.com/data-science-activity-tracking-and-the-battle-for-the-worlds-top-sports-brand/" target="_blank" rel="noopener nofollow">this article </a>. Companies like Fitbit, Nike, and Jawbone Up are racing to develop the most advanced algorithms to attract new users. The data linked to from the course website represent data collected from the accelerometers from the Samsung Galaxy S smartphone. A full description is available at the site where the data was obtained:
+
+http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
+
+Here are the data for the project:
+
+https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip
+
+You should create one R script called run_analysis.R that does the following.
+
+1. Merges the training and the test sets to create one data set.
+2. Extracts only the measurements on the mean and standard deviation for each measurement.
+3. Uses descriptive activity names to name the activities in the data set
+4. Appropriately labels the data set with descriptive variable names.
+5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+
+# README
+
+The data codebook can be obtained from the author's .git repository, `GettingAndCleaningData_Project` titled `HARreadme.txt`.  The final tidy dataframe `CODEBOOK.Rmd` that accompany's this project provides detailes for each variable according to the original coding rubric.
+
+# Step 1. Import data.  
+
+```{r, SECTION01, echo = TRUE, message = FALSE, warning = FALSE}
 if(T){ ## BEGIN SECTION 1 - IMPORT DATA ##
 ## 1. Import Data
         ## 0. Paths
@@ -114,51 +157,9 @@ features <- rbind(features, ID); names(features); head(features); tail(features)
 
 
 
-# Preface 
+# Step 2. Process data frames into untidy data frame and add frontmatter to the x_test and x_train data.
 
-The Coursera course *Getting and Cleaning Data* CODEBOOK is intended to provide the user with enough information to replicate the data analysis in the project.  Users of the CODEBOOK should be able to understand how the data was tidyed to its current state.  
-
-The `CODEBOOK` is a companion to the `run_analysis.R` and `README.md` files.  The github repository is located at https://github.com/prosumer1001/GettingAndCleaningData_Project.  Direct all questions to the author at prosumer1001@gmail.com.
-
-# Instructions
-
-### Review Criteria
-
-1. The submitted data set is tidy.
-2. The Github repo contains the required scripts.
-3. GitHub contains a code book that modifies and updates the available codebooks with the data to indicate all the variables and summaries calculated, along with units, and any other relevant information.
-4. The README that explains the analysis files is clear and understandable.
-5. The work submitted for this project is the work of the student who submitted it.
-
-### Course Project Description 
-
-The course project description is copied verbatim from the site.[^1]
-
-The purpose of this project is to demonstrate your ability to collect, work with, and clean a data set. The goal is to prepare tidy data that can be used for later analysis. You will be graded by your peers on a series of yes/no questions related to the project. You will be required to submit: 1) a tidy data set as described below, 2) a link to a Github repository with your script for performing the analysis, and 3) a code book that describes the variables, the data, and any transformations or work that you performed to clean up the data called `CodeBook.md`. You should also include a `README.md` in the repo with your scripts. This `README.md` explains how all of the scripts work and how they are connected.
-
-One of the most exciting areas in all of data science right now is wearable computing - see for example <a href="http://www.insideactivitytracking.com/data-science-activity-tracking-and-the-battle-for-the-worlds-top-sports-brand/" target="_blank" rel="noopener nofollow">this article </a>. Companies like Fitbit, Nike, and Jawbone Up are racing to develop the most advanced algorithms to attract new users. The data linked to from the course website represent data collected from the accelerometers from the Samsung Galaxy S smartphone. A full description is available at the site where the data was obtained:
-
-http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
-
-Here are the data for the project:
-
-https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip
-
-You should create one R script called run_analysis.R that does the following.
-
-1. Merges the training and the test sets to create one data set.
-2. Extracts only the measurements on the mean and standard deviation for each measurement.
-3. Uses descriptive activity names to name the activities in the data set
-4. Appropriately labels the data set with descriptive variable names.
-5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
-
-# README
-
-The data codebook can be obtained from the author's .git repository, `GettingAndCleaningData_Project` titled `HARreadme.txt`.  The final tidy dataframe `CODEBOOK.Rmd` that accompany's this project provides detailes for each variable according to the original coding rubric.
-
-# Step 1. Import data.  
-
-```{r, SECTION02, message = FALSE, warning=FALSE}
+```{r, SECTION02, echo = TRUE, message = FALSE, warning = FALSE}
 if(T){ ## BEGIN SECTION 2 ##
 ##      A. Create the rows data frame that will select the correct variables
 ##         from the x_test and x_train data frames in Section 3.  This step
@@ -201,8 +202,6 @@ xtrainResults <- tibble::rowid_to_column(xtrainResults, "ID"); names(xtrainResul
 
 ```
 
-# Step 2. Process data frames into untidy data frame.
-
 ## Variable name rules / coding rules.  
 
 The `raw` datasets exist in eight text files:
@@ -229,72 +228,90 @@ The x_train and x_test files containe all of the observational data.  The y_trai
 
 The difference between the original file and the naming conventions used in this data frame include the removal of all special characters (i.e. **-** and **()**).  Additionally, all characters were changed to lower case.  Thus, a prior exmaple might be:  `fBodyAccJerkMag` and the new variable name is `fbodyaccjerkmag`.  While the lack of upper case letters may make deciphering the variable more difficult at first, it will make errors in the code of future uesers less likely to occur.  The practical benefits is that a major transformation has not taken place, so using the original code-book ensures replicability with less errors, which should increase the likelyhood of replication, all else equal.
 
+# Step 3. Process the y_test.txt dataset, the activity_labels.txt dataset, and the subject_test.txt data sets.  
 
-```{r, untidy_data, echo = TRUE, message = FALSE, warning=FALSE}
-## 2. Create Activity and Subject Data Frames (activityDF v1.0 and subjectDF v1.0)
-##      A. Create Activity Labels Data Frame for Joining to y_test and y_train
-y_test <- y_test %>% rename(label = V1) ## rename variable for future join
-y_train <- y_train %>% rename(label = V1) ## rename variable for future join
-activity_labels <- activity_labels %>% rename(label = V1) ## rename variable for future join
-activity_labels <- activity_labels %>% rename(category = V2) ## rename variable for future join
+```{r, SECTION03, echo = TRUE, message = FALSE, warning=FALSE}
+if(T){## BEGIN SECTION 3 ##
+##      3. Add front matter to xtrainResults and xtestResults DFs.  Code below creates two data frames: xtestResults & xtrainResults WITH front matter.
+##        A. Build the xtest results DF with front matter
+frontMatterTest <- left_join(y_test, subject_test, by = "ID"); str(frontMatterTest); names(frontMatterTest)
+frontMatterTest <- left_join(frontMatterTest, labelsDF, by = "factor"); str(xtestResults);  names(frontMatterTest)
+frontMatterTest <- frontMatterTest %>% rename(ID = ID.x)
+frontMatterTest <- frontMatterTest %>% select(-ID.y)
+xtestResults <- left_join(frontMatterTest, xtestResults, by = "ID"); str(xtestResults) ## left join by the ID variable
 
-##      B. LEFT JOIN 01 - y_test + activity_labels to make activityDF01 - goes with test data
-activityDF01 <- left_join(y_test, activity_labels, by = "label"); str(activityDF01)  ## conduct left_join(by = "factor") for the partialDF and activity_lables described above; use str() to review the outcome of the join
-sample_n(activityDF01, 10) ## take a sample of the partialDF to make sure that the DF is complete and accurate
-activityDF01 <- activityDF01 %>% rename(testlabel = label) ## rename variable for future join
-activityDF01 <- activityDF01 %>% rename(testcategory = category) ## rename variable for future join
+##        B. Build the xtrain results DF with front matter
+frontMatterTrain <- left_join(y_train, subject_train, by = "ID"); str(frontMatterTrain); names(frontMatterTrain)
+frontMatterTrain <- left_join(frontMatterTrain, labelsDF, by = "factor"); str(xtrainResults);  names(frontMatterTrain)
+frontMatterTrain <- frontMatterTrain %>% rename(ID = ID.x)
+frontMatterTrain <- frontMatterTrain %>% select(-ID.y)
+xtrainResults <- left_join(frontMatterTrain, xtrainResults, by = "ID"); str(xtrainResults) ## left join by the ID variable
 
-##      C. LEFT JOIN 02 - y_train + activity_labels to make activityDF02 - goes with training data
-activityDF02 <- left_join(y_train, activity_labels, by = "label"); str(activityDF02)  ## conduct left_join(by = "factor") for the partialDF and activity_lables described above; use str() to review the outcome of the join
-sample_n(activityDF02, 10) ## take a sample of the partialDF to make sure that the DF is complete and accurate
-activityDF02 <- activityDF02 %>% rename(traininglabel = label)
-activityDF02 <- activityDF02 %>% rename(trainingcategory = category)
+# View(xtrainResults)
+# View(xtestResults)
 
-##      D. FULL JOIN 01 - activityDF01 + activityDF02 = activityDF (version 1.0)
-activityDF <- full_join(activityDF01, activityDF02, by = "ID")
-# sample_n(activityDF, 25) ## take a sample of the partialDF to make sure that the DF is complete and accurate
-# tail(activityDF)
 
-##      E. FULL JOIN 02 - subject_test + subject_train = subjectDF (version 1.0)
-subject_test <- subject_test %>% rename(testsubjectid = V1)
-subject_train <- subject_train %>% rename(trainingsubjectid = V1)
-subjectDF <- full_join(subject_test, subject_train, by = "ID") ## left_join subject_test and subject_train by = "ID" to make subjectDF (version 1.0)
-# sample_n(subjectDF, 25) ## take a sample of the partialDF to make sure that the DF is complete and accurate
-# tail(subjectDF)
-
-##      F. Create a vector from the features.txt data set that will become the variable
-##         names for the x_train and x_test in the next step.
-features$V2 <- str_replace_all(features$V2, "[[:punct:]]", "") # remove all punctuation and ensure there are no spaces
-features$V2 <- tolower(features$V2)  # make all alpha characters lowercase
-features <- features %>%  # change names of variables and select only the strings
-        rename(objectid = "V1", featureNames = "V2") %>%
-        select(featureNames); sample_n(features, 10); tail(features)
-
-##      G. Make the features.txt names into the variable names for the x_train and x_test data frames.
-names(x_test) <- features$featureNames; head(x_test); names(x_test) # make the vector featureNames the column names for x_test
-names(x_train) <- features$featureNames; head(x_train); names(x_train) # make the vector featureNames the column names for x_train
-tail(x_test)
-tail(x_train)
+} ## END SECTION 3 ##
 
 ```
 
-# Step 3. Process the y_test.txt dataset, the activity_labels.txt dataset, and the subject_test.txt data sets.  
 
 There will be many variables since both the training and the test data have the same variables--each of which has 561 variables. The approach used is to create a tidy test variable and training variable.  After the training data frame is made tidy it can be bound to the tidy test data frame by rows.
 
-```{r, process_data, echo = TRUE, message=FALSE, warning=FALSE}
-completetestDF <- x_test # create new processed data frame called `completetestDF` that will ultimately have all the test data included once processed
-export(completetestDF, file = "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Processed/completetestDF.RData") # save processed data to appropriate directory
+# Step 4. Create an experiementType column so the final dataset remains in tidy form.
 
-completetrainDF <- x_train # create new processed data frame called `completeDF` that will ultimately have all the test data included once processed
-completetrainDF
-export(completetrainDF, file = "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Processed/completetrainDF.RData")
+```{r, SECTION04, echo = TRUE, message=FALSE, warning=FALSE}
+if(T){ ## BEGIN SECTION 4 ##
+##      4. Add experimentType column to each DF, "train" for training and
+##              "test" for testing
+##        A. Add column for experimentType for testing.
+experimentType <- data.frame(experimentType = "test", stringsAsFactors = FALSE)
+experimentType <- experimentType %>% slice(rep(1:n(), each=2947)); str(experimentType)
+experimentType <- tibble::rowid_to_column(experimentType, "ID"); str(experimentType)
+xtestResults <- left_join(xtestResults, experimentType); names(xtestResults)
+xtestResults <- xtestResults %>% select(ID, factor, subjecttestID, label, experimentType, everything()); names(xtestResults)
 
+##        B. Add column for experimentType for training
+experimentType <- data.frame(experimentType = "train", stringsAsFactors = FALSE)
+experimentType <- experimentType %>% slice(rep(1:n(), each=7352)); str(experimentType)
+experimentType <- tibble::rowid_to_column(experimentType, "ID"); str(experimentType)
+xtrainResults <- left_join(xtrainResults, experimentType); names(xtrainResults)
+xtrainResults <- xtrainResults %>% select(ID, factor, subjecttrainID, label, experimentType, everything()); names(xtrainResults)
 
+        } ## END SECTION 4 ##
 ```
 
 
+# Step 5. Merge the datasets into the final, `completeDF` dataset.  The dataset is tidy and has the appropriate frontmatter for statistical analysis.
 
+```{r, SECTION05, echo = TRUE, message = FALSE, warning = FALSE}
+if(T){ ## BEGIN SECION 5 ##
+##      5. Merge xtrainResults and xtestResults into `completeDF`, a single 
+##              tidy dataset.
 
+##        A. Rename subjectID variables to be identical for both data frames
+##              and verify.
+xtestResults <- xtestResults %>% rename(subjectID = "subjecttestID") # rename subjecttestID
+xtrainResults <- xtrainResults %>% rename(subjectID = "subjecttrainID") # rename subjectrainID
+all_equal(xtestResults, xtrainResults, ignore_col_order = FALSE, ignore_row_order = TRUE) # verify the columns are identical
+##      output:  > [1] "Different number of rows" >> Indicates the columns are identical
+
+##        B. dplyr bind_rows()
+
+completeDF <- bind_rows(xtestResults, xtrainResults)
+str(completeDF)
+
+} ## END SECTION 5 ##
+```
+
+# Conclusion
+
+The data frame, `completeDF` fulfills the requirements outlines in review criteria.  All code is commented in the scripting and the README.Rmd file provides further explanation.
+
+1. The submitted data set is tidy.
+2. The Github repo contains the required scripts.
+3. GitHub contains a code book that modifies and updates the available codebooks with the data to indicate all the variables and summaries calculated, along with units, and any other relevant information.
+4. The README that explains the analysis files is clear and understandable.
+5. The work submitted for this project is the work of the student who submitted it.
 
 [^1]: from https://www.coursera.org/learn/data-cleaning/peer/FIZtT/getting-and-cleaning-data-course-project
