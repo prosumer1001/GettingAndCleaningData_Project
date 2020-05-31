@@ -21,29 +21,39 @@ ipak(packages)
 } # Preamble
 
 ## Table of Contents (TOC)
-## 1. Import Data
-##      A. y_test (TEST LABELS)
-##      B. y_train (TRAINING LABELS)
-##      C. x_test (TEST DATA)
-##      D. x_train (TRAINING DATA)
-##      E. subject_test (TEST SUBJECTS)
-##      F. subject_train (TRAINING SUBJECTS)
-##      G. activity_lables (ACTIVITY FACTOR LABELS)
-##      H. features (VARIABLE NAMES AS A FEATURES VECTOR)
+##      1. Import Data
+##              A. y_test (TEST LABELS)
+##              B. y_train (TRAINING LABELS)
+##              C. x_test (TEST DATA)
+##              D. x_train (TRAINING DATA)
+##              E. subject_test (TEST SUBJECTS)
+##              F. subject_train (TRAINING SUBJECTS)
+##              G. activity_lables (ACTIVITY FACTOR LABELS)
+##              H. features (VARIABLE NAMES AS A FEATURES VECTOR)
 
-## 2. Create FRONT MATTER (Activity and Subject Data Frames) (activityDF v1.0 and subjectDF v1.0)
-##      A. Create Activity Labels Data Frame for Joining to y_test and y_train
-##      B. LEFT JOIN 01 - y_test + activity_labels to make activityDF01 (TEST DATA)
-##      C. LEFT JOIN 02 - y_train + activity_labels to make activityDF02 (TNG DATA)
-##      D. FULL JOIN 01 - activityDF01 + activityDF02 = activityDF (version 1.0)
-##      E. FULL JOIN 02 - subject_test + subject_train = subjectDF (version 1.0)
-## 3. Create the datasets data frames
-##      A. Create the rows data frame
-##      B. Create the xtestResults and xtrainResults data frames. 
+##      !!!--- SECTION 2 NOT USED ---!!!
+##      2. Create FRONT MATTER (Activity and Subject Data Frames) (activityDF v1.0 and subjectDF v1.0)
+##              A. Create Activity Labels Data Frame for Joining to y_test and y_train
+##              B. LEFT JOIN 01 - y_test + activity_labels to make activityDF01 (TEST DATA)
+##              C. LEFT JOIN 02 - y_train + activity_labels to make activityDF02 (TNG DATA)
+##              D. FULL JOIN 01 - activityDF01 + activityDF02 = activityDF (version 1.0)
+##              E. FULL JOIN 02 - subject_test + subject_train = subjectDF (version 1.0)
 
-## 4. Add front matter to xtrainResults and xtestResults DFs.
-##      A. Build the xtest results DF with front matter
-##      B. Build the xtrain results DF with front matter
+##      3. Create the datasets data frames
+##              A. Create the rows data frame
+##              B. Create the xtestResults and xtrainResults data frames. 
+
+##      4. Add front matter to xtrainResults and xtestResults DFs.
+##              A. Build the xtest results DF with front matter
+##              B. Build the xtrain results DF with front matter
+
+##      5. Add experimentType column to each DF, "train" for training and
+##              A. Add column for experimentType for testing.
+##              B. Add column for experimentType for training
+
+##      6. Merge xtrainResults and xtestResults into `completeDF`, a single 
+##              A. Rename subjectID variables to be identical for both data frames
+##              B. dplyr bind_rows()
 
 
 ## TOC For DFs Created
@@ -65,7 +75,6 @@ processeddata <- "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Proje
 y_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/y_test.txt") ## load the y_test.txt data file
 y_test <- tibble::rowid_to_column(y_test, "ID") ## create a unique variable named `ID` in the y_test for left_join(by = "ID")
 y_test <- y_test %>% rename(factor = "V1"); str(y_test)
-
 
         ## B. y_train (TRAINING LABELS)
 y_train <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/train/y_train.txt")
@@ -181,11 +190,11 @@ rows$ID <- gsub(" ", "", rows$ID) # remove all the white spaces
 rows$FEATURE <- str_replace_all(rows$FEATURE, "[[:punct:]]", "") # remove all special characters
 
 ##      B. Create the xtestResults and xtrainResults data frames with ID column
-xtestResults <- select_(x_test, .dots = rows$ID); # create df that only includes the mean and std variables for the test results 
+xtestResults <- select(x_test, .dots = rows$ID); # create df that only includes the mean and std variables for the test results 
 names(xtestResults) <- rows$FEATURE; # Make the vector FEATURE the column names for xtestResults
 xtestResults <- tibble::rowid_to_column(xtestResults, "ID"); names(xtestResults)
 
-xtrainResults <- select_(x_train, .dots = rows$ID); # create df that only includes the mean and std variables for the train results 
+xtrainResults <- select(x_train, .dots = rows$ID); # create df that only includes the mean and std variables for the train results 
 names(xtrainResults) <- rows$FEATURE; # Make the vector FEATURE the column names for xtrainResults
 xtrainResults <- tibble::rowid_to_column(xtrainResults, "ID"); names(xtrainResults)
 
@@ -208,8 +217,8 @@ frontMatterTrain <- frontMatterTrain %>% rename(ID = ID.x)
 frontMatterTrain <- frontMatterTrain %>% select(-ID.y)
 xtrainResults <- left_join(frontMatterTrain, xtrainResults, by = "ID"); str(xtrainResults) ## left join by the ID variable
 
-View(xtrainResults)
-View(xtestResults)
+# View(xtrainResults)
+# View(xtestResults)
 
 
 } ## END SECTION 4 ##
@@ -224,7 +233,7 @@ experimentType <- tibble::rowid_to_column(experimentType, "ID"); str(experimentT
 xtestResults <- left_join(xtestResults, experimentType); names(xtestResults)
 xtestResults <- xtestResults %>% select(ID, factor, subjecttestID, label, experimentType, everything()); names(xtestResults)
 
-##      A. Add column for experimentType for training
+##      B. Add column for experimentType for training
 experimentType <- data.frame(experimentType = "train", stringsAsFactors = FALSE)
 experimentType <- experimentType %>% slice(rep(1:n(), each=7352)); str(experimentType)
 experimentType <- tibble::rowid_to_column(experimentType, "ID"); str(experimentType)
@@ -232,6 +241,24 @@ xtrainResults <- left_join(xtrainResults, experimentType); names(xtrainResults)
 xtrainResults <- xtrainResults %>% select(ID, factor, subjecttrainID, label, experimentType, everything()); names(xtrainResults)
 
         } ## END SECTION 5 ##
+
+if(T){ ## BEGIN SECION 6 ##
+##      6. Merge xtrainResults and xtestResults into `completeDF`, a single 
+##              tidy dataset.
+
+##      A. Rename subjectID variables to be identical for both data frames
+##              and verify.
+xtestResults <- xtestResults %>% rename(subjectID = "subjecttestID") # rename subjecttestID
+xtrainResults <- xtrainResults %>% rename(subjectID = "subjecttrainID") # rename subjectrainID
+all_equal(xtestResults, xtrainResults, ignore_col_order = FALSE, ignore_row_order = TRUE) # verify the columns are identical
+##      output:  > [1] "Different number of rows" >> Indicates the columns are identical
+
+##      B. dplyr bind_rows()
+
+completeDF <- bind_rows(xtestResults, xtrainResults)
+str(completeDF)
+
+} ## END SECTION 6 ##
 
 ## TODO:  the data frame that captures the correct training and test 
 ##        observations (see .  There will be many variables since both the 
@@ -244,8 +271,8 @@ xtrainResults <- xtrainResults %>% select(ID, factor, subjecttrainID, label, exp
 ##                DFs - COMPLETE
 ##        Step 3. make the xtestResults and xtrainResults, tidy, 
 ##                data frames - COMPLETE  
-##        Step 4. merge the x_train and x_test, tidy, data frames into the 
-##                `completeDF` data frame.
+##        Step 4. merge the xtrainResults and xtestResults, tidy, data 
+##                frames into the `completeDF` data frame. - COMPLETE
 ##        Step 5. write the README.Rmd
 ##        Step 6. write the CODEBOOK.Rmd
 

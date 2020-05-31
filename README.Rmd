@@ -19,19 +19,106 @@ output: html_notebook
   ipak(packages)
 ```
 
-```{r, load_data, echo = FALSE, warning = FALSE, message = FALSE}
-features <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/features.txt") # import features.txt data into working environment
-x_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/x_test.txt") # import features.txt data into working environment
+# Code Table of Contents (TOC)
 
+## 1. SECION 1 - Import Data
+  A. y_test (TEST LABELS)
+  B. y_train (TRAINING LABELS)
+  C. x_test (TEST DATA)
+  D. x_train (TRAINING DATA)
+  E. subject_test (TEST SUBJECTS)
+  F. subject_train (TRAINING SUBJECTS)
+  G. activity_lables (ACTIVITY FACTOR LABELS)
+  H. features (VARIABLE NAMES AS A FEATURES VECTOR)
+
+## 2. SECTION 2 - Create the datasets data frames
+  A. Create the rows data frame
+  B. Create the xtestResults and xtrainResults data frames. 
+
+## 3. SECTION 3 - Add front matter to xtrainResults and xtestResults DFs.
+  A. Build the xtest results DF with front matter
+  B. Build the xtrain results DF with front matter
+
+## 4. SECTION 4 - Add experimentType column to each DF, "train" for training and
+  A. Add column for experimentType for testing.
+  B. Add column for experimentType for training
+
+## 5. SECTION 5 - Merge xtrainResults and xtestResults into `completeDF`, a single 
+  A. Rename subjectID variables to be identical for both data frames
+  B. dplyr bind_rows()
+
+
+```{r, SECTION01, echo = TRUE, warning = FALSE, message = FALSE}
+if(T){ ## BEGIN SECTION 1 - IMPORT DATA ##
+## 1. Import Data
+        ## 0. Paths
+testpath <- "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test"
+trainingpath <- "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/training"
+testinertials<- "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/InertialSignals"
+traininginertials<- "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/training/InertialSignals"
+processeddata <- "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/processed"
+        ## A. y_test (TEST LABLES)
+y_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/y_test.txt") ## load the y_test.txt data file
+y_test <- tibble::rowid_to_column(y_test, "ID") ## create a unique variable named `ID` in the y_test for left_join(by = "ID")
+y_test <- y_test %>% rename(factor = "V1"); str(y_test)
+
+        ## B. y_train (TRAINING LABELS)
+y_train <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/train/y_train.txt")
+y_train <- tibble::rowid_to_column(y_train, "ID") ## create a unique variable named `ID` in the y_train for left_join(by = "ID")
+str(y_train)
+y_train <- y_train %>% rename(factor = "V1"); str(y_train)
+
+        ## C. x_test (TEST DATA)
+x_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/x_test.txt") # import features.txt data into working environment
+x_test <- tibble::rowid_to_column(x_test, "ID"); names(x_test)
+# ID <- x_test %>% select(ID); names(ID)
+names(x_test)
+# x_test <- x_test %>% select(-ID); names(x_test)
+# x_test <- cbind(x_test, ID); names(x_test)
+
+        ## D. x_train (TRAINING DATA)
+x_train <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/train/x_train.txt") # import features.txt data into working environment
+x_train <- tibble::rowid_to_column(x_train, "ID"); names(x_train)
+# ID <- x_train %>% select(ID); names(ID)
+names(x_train)
+# x_train <- x_train %>% select(-ID); names(x_train)
+# x_train <- cbind(x_train, ID); names(x_train)
+
+        ## E. subject_test (TEST)
+subject_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/subject_test.txt") ## load the subject_test.txt (the person's ID number that was in the test) data file
+subject_test <- tibble::rowid_to_column(subject_test, "ID"); str(subject_test) ## create a unique variable named `ID` in the subject_test for left_join(by = "ID")
+subject_test <- subject_test %>% rename(subjecttestID = "V1"); str(subject_test)
+
+        ## F. subject_train
+subject_train <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/train/subject_train.txt") ## load the subject_train.txt data file)
+subject_train <- tibble::rowid_to_column(subject_train, "ID"); str(subject_train) ## create a unique variable named `ID` in the subject_train for left_join(by = "ID")
+subject_train <- subject_train %>% rename(subjecttrainID = "V1"); str(subject_train)
+
+        ## G. activity_lables
+activity_labels <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/activity_labels.txt") ## load the activity_labels.txt data file
+labelsDF <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/activity_labels.txt") # import labelsDF.RData
+labelsDF <- labelsDF %>% rename(ID = "V1")
+labelsDF <- labelsDF %>% rename(label = "V2"); str(labelsDF)
+labelsDF <- labelsDF %>% mutate(factor = ID); str(labelsDF)
+labelsDF <- labelsDF %>% select(ID, factor, label)
+export(labelsDF, file = "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Processed/labels.RData")
+labelsDF <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Processed/labels.RData")
+
+        ## H. features
+features <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/features.txt"); head(features) # import features.txt data into working environment
+ID <- "ID"
+features <- rbind(features, ID); names(features); head(features); tail(features); sample_n(features, 10)
+
+} ## END SECTION 1 ##
 ```
+
+
 
 # Preface 
 
 The Coursera course *Getting and Cleaning Data* CODEBOOK is intended to provide the user with enough information to replicate the data analysis in the project.  Users of the CODEBOOK should be able to understand how the data was tidyed to its current state.  
 
 The `CODEBOOK` is a companion to the `run_analysis.R` and `README.md` files.  The github repository is located at https://github.com/prosumer1001/GettingAndCleaningData_Project.  Direct all questions to the author at prosumer1001@gmail.com.
-
-
 
 # Instructions
 
@@ -71,47 +158,47 @@ The data codebook can be obtained from the author's .git repository, `GettingAnd
 
 # Step 1. Import data.  
 
-```{r, data, message = FALSE, warning=FALSE}
-## 1. Import Data
-        ## 0. Paths
-testpath <- "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test"
-trainingpath <- "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/training"
-testinertials<- "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/InertialSignals"
-traininginertials<- "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/training/InertialSignals"
-processeddata <- "~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/processed"
-        ## A. y_test (TEST LABLES)
-y_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/y_test.txt") ## load the y_test.txt data file
-y_test <- tibble::rowid_to_column(y_test, "ID") ## create a unique variable named `ID` in the y_test for left_join(by = "ID")
-        ## B. y_train (TRAINING LABELS)
-y_train <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/train/y_train.txt")
-y_train <- tibble::rowid_to_column(y_train, "ID") ## create a unique variable named `ID` in the y_train for left_join(by = "ID")
-str(y_train)
-x_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/x_test.txt") # import features.txt data into working environment
-x_test <- tibble::rowid_to_column(x_test, "ID"); names(x_test)
-ID <- x_test %>% select(ID); names(ID)
-names(x_test)
-x_test <- x_test %>% select(-ID); names(x_test)
-x_test <- cbind(x_test, ID); names(x_test)
+```{r, SECTION02, message = FALSE, warning=FALSE}
+if(T){ ## BEGIN SECTION 2 ##
+##      A. Create the rows data frame that will select the correct variables
+##         from the x_test and x_train data frames in Section 3.  This step
+##         was necessary because when using regex and grep there were duplicate
+##         names in the features.txt data frame.  Thus, removing all except
+##         the columns specified in the instructions became a necessary
+##         pre-condition to successfully creating the test and training
+##         data frames.
 
-x_train <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/train/x_train.txt") # import features.txt data into working environment
-x_train <- tibble::rowid_to_column(x_train, "ID"); names(x_train)
-ID <- x_train %>% select(ID); names(ID)
-names(x_train)
-x_train <- x_train %>% select(-ID); names(x_train)
-x_train <- cbind(x_train, ID); names(x_train)
+rows01 <- features %>% filter(grepl("mean",V2)); str(rows01) # create a new df of only the `mean` values (instructions, requirement #2)
+# rows01$V1 <- as.numeric(rows01$V1); str(rows01) # make V1 numeric value
+rows01 <- rows01 %>% arrange(V1); rows01; str(rows01) # arrange from smallest to largest
+rows02 <- features %>% filter(grepl("std", V2)); rows02; str(rows02) # create a new df of only the `sd` values (instructions, requirement #2)
+# rows02$V1 <- as.numeric(rows02$V1); str(rows02) # make V1 numeric value
+rows02 <- rows02 %>% arrange(V1); str(rows02) # arrange from smallest to largest
+rows01 <- rows01 %>% rename(ID = "V1"); rows01; str(rows01) # rename the V1 to ID
+rows02 <- rows02 %>% rename(ID = "V1"); rows02; str(rows02) # rename the V1 to ID
+rows <- full_join(rows01, rows02, by = "ID"); names(rows); sample_n(rows, 25) # join rows01 & rows02
+rows <- as_tibble(rows) # make rows a tibble
+rows <- unite(rows, FEATURE, V2.x:V2.y, na.rm = TRUE, remove = TRUE) # unite the columns into a single column
+rows <- rows %>% arrange(ID); rows # arrange from smallest to largest
+rows <- rows %>% mutate(ID2 = ID); names(rows); rows
+rows <- rows %>% select(ID, ID2, FEATURE)
+rows$ID <- as.character(rows$ID) # convert each observation to character
+str(rows)
+rows$ID <- paste("V", rows$ID) # add a `V` to each observation
+rows$ID <- gsub(" ", "", rows$ID) # remove all the white spaces
+rows$FEATURE <- str_replace_all(rows$FEATURE, "[[:punct:]]", "") # remove all special characters
 
-        ## C. subject_test (TEST)
-subject_test <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/test/subject_test.txt") ## load the subject_test.txt (the person's ID number that was in the test) data file
-subject_test <- tibble::rowid_to_column(subject_test, "ID") ## create a unique variable named `ID` in the subject_test for left_join(by = "ID")
-        ## D. subject_train
-subject_train <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/train/subject_train.txt") ## load the subject_train.txt data file)
-subject_train <- tibble::rowid_to_column(subject_train, "ID") ## create a unique variable named `ID` in the subject_train for left_join(by = "ID")
+##      B. Create the xtestResults and xtrainResults data frames with ID column
+xtestResults <- select(x_test, .dots = rows$ID); # create df that only includes the mean and std variables for the test results 
+names(xtestResults) <- rows$FEATURE; # Make the vector FEATURE the column names for xtestResults
+xtestResults <- tibble::rowid_to_column(xtestResults, "ID"); names(xtestResults)
 
-        ## E. activity_lables
-activity_labels <- import("~/Documents/gitrepos/DataAnalysis/GettingAndCleaningData_Project/Project/Data/Raw/activity_labels.txt") ## load the activity_labels.txt data file
-unique(activity_labels)
-ID <- "ID"
-features <- rbind(features, ID); tail(features)
+xtrainResults <- select(x_train, .dots = rows$ID); # create df that only includes the mean and std variables for the train results 
+names(xtrainResults) <- rows$FEATURE; # Make the vector FEATURE the column names for xtrainResults
+xtrainResults <- tibble::rowid_to_column(xtrainResults, "ID"); names(xtrainResults)
+
+} ## END SECTION 2 ##
+
 ```
 
 # Step 2. Process data frames into untidy data frame.
@@ -211,4 +298,3 @@ export(completetrainDF, file = "~/Documents/gitrepos/DataAnalysis/GettingAndClea
 
 
 [^1]: from https://www.coursera.org/learn/data-cleaning/peer/FIZtT/getting-and-cleaning-data-course-project
-
